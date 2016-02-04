@@ -16,19 +16,19 @@ class Vehicle {
 
   void update() {
     if (location.x >= width) {
-      location.x = 0;
+      location.x = width;
     }
 
     if (location.y >= height) {
-      location.y = 0;
-    }
-
-  if (location.y <= 0) {
       location.y = height;
     }
 
+  if (location.y <= 0) {
+      location.y = 0;
+    }
+
     if (location.x <= 0) {
-      location.x = width;
+      location.x = 0;
     }
 
     PVector desired = field.lookup(this.location).copy();
@@ -81,7 +81,7 @@ class FlowField {
   void Init() {
     for (int x = 0; x < floor(width/resolution); ++x) {
        for (int y = 0; y < floor(height/resolution); ++y) {
-        float angle = map(noise(y), 0, 1, 0, 60);
+        float angle = map(noise(y), 0, 1, 0, 120);
         PVector vector = PVector.fromAngle(angle);
         field[x][y] = vector;
        }
@@ -89,10 +89,8 @@ class FlowField {
   }
 
   PVector lookup(PVector position) {
-    int x = floor(position.x/resolution);
-    int y = floor(position.y/resolution);
-    x = constrain(x, 0, 19);
-    y = constrain(y, 0, 19);
+    int x = constrain(floor(position.x/resolution), 0, floor(width/resolution)-1);
+    int y = constrain(floor(position.y/resolution), 0, floor(height/resolution)-1);
     PVector vector = field[x][y];
     fill(0);
     stroke(0);
@@ -105,6 +103,8 @@ class FlowField {
         pushMatrix();
         stroke(0);
         translate(x*resolution+resolution/2, y*resolution+resolution/2);
+        fill(255);
+        rect(-resolution/2, -resolution/2, resolution, resolution);
         PVector vector = field[x][y].copy();
         rotate(vector.heading());
         vector.setMag(resolution/2);
@@ -123,7 +123,7 @@ ArrayList<Vehicle> vehicles;
 
 void setup() {
   size(1000, 1000, P2D);
-  field = new FlowField(50);
+  field = new FlowField(70);
   vehicles = new ArrayList<Vehicle>();
 }
 
@@ -132,14 +132,13 @@ void draw() {
   field.render();
   for (Vehicle vehicle : vehicles) {
     vehicle.update();
-    vehicle.display();  
+    vehicle.display();
   }
- 
+
   if (mousePressed) {
-    Vehicle v = new Vehicle(mouseX, mouseY, random(100), random(0.5));
+    Vehicle v = new Vehicle(mouseX, mouseY, random(100), random(0.3));
     v.follow(field);
     vehicles.add(v);
   }
 
 }
-
